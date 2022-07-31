@@ -1,0 +1,19 @@
+[package]
+name = "yew-clay-test"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+yew = "0.19.3"
+yew-clay = { path = "/Users/brianheise/code/toadslop/yew-clay", features = ["button"]}
+web-sys = "0.3.59"
+yew-dom-attributes = { path = "/Users/brianheise/code/toadslop/yew-dom-attributes" }
+
+[dependencies.material-yew]
+version = "0.2.0"
+features = [
+    "button",
+    "icon"
+]
