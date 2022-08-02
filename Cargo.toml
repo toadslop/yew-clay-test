@@ -7,9 +7,11 @@ edition = "2021"
 
 [dependencies]
 yew = "0.19.3"
-yew-clay = { path = "/Users/brianheise/code/toadslop/yew-clay", features = ["button"]}
+yew-clay = { path = "/home/toadslop/code/toadslop/yew/yew-clay", features = ["button"]}
 web-sys = "0.3.59"
-yew-dom-attributes = { path = "/Users/brianheise/code/toadslop/yew-dom-attributes" }
+yew-dom-attributes = { path = "/home/toadslop/code/toadslop/yew/yew-dom-attributes" }
+wasm-bindgen = "0.2.82"
+gloo-console = "0.2.1"
 
 [dependencies.material-yew]
 version = "0.2.0"

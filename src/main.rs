@@ -1,13 +1,16 @@
+use gloo_console::log;
 use material_yew::MatButton;
-use web_sys::console;
 use yew::prelude::*;
-use yew_clay::button::Group;
+use yew_clay::button::ButtonGroup;
 use yew_clay::button::{ClayButton, DisplayType};
 use yew_clay::icon::ClayIcon;
-use yew_dom_attributes::aria_attributes::{
-    AriaAttributes, AriaAutocomplete, AriaChecked, AriaHasPopup,
-};
-use yew_dom_attributes::misc_attributes::MiscAttrs;
+use yew_dom_attributes::aria_attributes::AriaAttributeReceiver;
+use yew_dom_attributes::aria_attributes::AriaAttributes;
+use yew_dom_attributes::button_html_attributes::ButtonHtmlAttributes;
+use yew_dom_attributes::events::EventPropsReceiver;
+use yew_dom_attributes::events::MouseEvents;
+use yew_dom_attributes::misc_attributes::CustomAttributeReceiver;
+use yew_dom_attributes::props::button_props::ButtonProps;
 
 enum Msg {
     AddOne,
@@ -17,7 +20,7 @@ enum Msg {
 struct Model {
     value: i64,
     btn_disabled: bool,
-    btn_1_misc_attrs: MiscAttrs,
+    button_props: ButtonProps,
 }
 
 impl Component for Model {
@@ -25,13 +28,13 @@ impl Component for Model {
     type Properties = ();
 
     fn create(_ctx: &Context<Self>) -> Self {
-        let mut misc_attrs = MiscAttrs::new();
-        misc_attrs.add_attribute("id".into(), "my-id".into());
-        misc_attrs.add_attribute("data-cy".into(), "clay-button".into());
+        let mut button_props = ButtonProps::new();
+        button_props.add_aria_attribute(AriaAttributes::AriaAtomic(true));
+
         Self {
             value: 0,
             btn_disabled: false,
-            btn_1_misc_attrs: misc_attrs,
+            button_props: button_props,
         }
     }
 
@@ -44,47 +47,44 @@ impl Component for Model {
                 true
             }
             Msg::SetDisabled(is_disabled) => {
+                log!("set disabled ran");
+                self.button_props
+                    .add_btn_attribute(ButtonHtmlAttributes::Disabled);
                 self.btn_disabled = is_disabled;
-                self.btn_1_misc_attrs
-                    .add_attribute("i-disabled-it".into(), "woo".into());
+                self.button_props
+                    .add_attribute("my-custom-attr".into(), "lalalala".into());
                 true
             }
         }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        // This gives us a component's "`Scope`" which allows us to send messages, etc to the component.
         let link = ctx.link();
         let is_disabled = self.btn_disabled.to_owned();
-        let on_click: Callback<MouseEvent> = link.callback(move |_ev| {
-            console::log_1(&"Hello using web-sys".into());
+
+        let callback: Callback<MouseEvent> = link.callback(move |_ev| {
+            log!("something");
             Msg::SetDisabled(!is_disabled)
         });
 
+        let mut button_props = self.button_props.clone();
+        button_props.add_mouse_event_listener(MouseEvents::Click(callback));
+
         let spritemap = "https://cdn.jsdelivr.net/npm/@clayui/css/lib/images/icons/icons.svg";
-        let aria = AriaAttributes {
-            aria_activedescendant: Some("hi".into()),
-            aria_atomic: Some(false),
-            aria_autocomplete: Some(AriaAutocomplete::List),
-            aria_busy: Some(true),
-            aria_checked: Some(AriaChecked::Mixed),
-            aria_colcount: Some(8),
-            aria_colindex: Some(8),
-            aria_haspopup: Some(AriaHasPopup::Dialog),
-            ..Default::default()
-        };
+
         html! {
             <div>
                 <button onclick={link.callback(|_| Msg::AddOne)}>{ "+1" }</button>
                 <p data-key={"something"} > { self.value }</p>
                 <MatButton label="Click me!"  />
-                <Group spaced={true} class={"stupid-class"}>
+                <ButtonGroup spaced={true} class={"stupid-class"}>
                     <ClayButton
-                        misc_attrs={self.btn_1_misc_attrs.clone()}
-                        disabled={self.btn_disabled}
+                       // misc_attrs={self.btn_1_misc_attrs.clone()}
+
                         display_type={DisplayType::Info}
-                        onclick={on_click}
-                        aria={aria}
+                        // onclick={on_click}
+                        button_html_attributes={Some(button_props)}
+                        //aria={aria}
                         >
                     {"Click Me"}
                     </ClayButton>
@@ -94,7 +94,7 @@ impl Component for Model {
                     {"Other Button"}
                     </ClayButton>
 
-                </Group>
+                </ButtonGroup>
                 <ClayIcon spritemap={spritemap} symbol={"add-cell"}></ClayIcon>
             </div>
         }
