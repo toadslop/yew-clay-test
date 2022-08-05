@@ -1,40 +1,59 @@
+use std::rc::Rc;
+
 use gloo_console::log;
 use material_yew::MatButton;
 use yew::prelude::*;
 use yew_clay::button::ButtonGroup;
 use yew_clay::button::{ClayButton, DisplayType};
 use yew_clay::icon::ClayIcon;
-use yew_dom_attributes::aria_attributes::AriaAttributeReceiver;
-use yew_dom_attributes::aria_attributes::AriaAttributes;
-use yew_dom_attributes::button_html_attributes::ButtonHtmlAttributes;
-use yew_dom_attributes::events::EventPropsReceiver;
-use yew_dom_attributes::events::MouseEvents;
-use yew_dom_attributes::misc_attributes::CustomAttributeReceiver;
-use yew_dom_attributes::props::button_props::ButtonProps;
+use yew_dom_attributes::attributes::aria_attributes::AriaAttributes;
+use yew_dom_attributes::attributes::button_html_attributes::ButtonHtmlAttributes;
+use yew_dom_attributes::events::events::{EventType, MouseEvents};
+use yew_dom_attributes::props::aria_props::AriaPropsHandler;
+use yew_dom_attributes::props::button_props::{ButtonProps2, ButtonPropsHandler};
+use yew_dom_attributes::props::custom_attributes::{CustomAttribute, CustomPropsHandler};
+use yew_dom_attributes::props::DomInjector;
 
-enum Msg {
+pub enum Msg {
     AddOne,
     SetDisabled(bool),
+    RemoveListener(String),
+    UpdateButtonProps(Rc<ButtonProps2>),
 }
 
 struct Model {
     value: i64,
     btn_disabled: bool,
-    button_props: ButtonProps,
+    button_props: Rc<ButtonProps2>,
 }
 
 impl Component for Model {
     type Message = Msg;
     type Properties = ();
 
-    fn create(_ctx: &Context<Self>) -> Self {
-        let mut button_props = ButtonProps::new();
-        button_props.add_aria_attribute(AriaAttributes::AriaAtomic(true));
+    fn create(ctx: &Context<Self>) -> Self {
+        let on_btn_props_update: Callback<Rc<ButtonProps2>> =
+            ctx.link().callback(move |btn_props: Rc<ButtonProps2>| {
+                gloo_console::log!("CALLBACK EMITTED");
+                Msg::UpdateButtonProps(btn_props)
+            });
+        let mut button_props = Rc::new(ButtonProps2::new(on_btn_props_update));
+        Rc::make_mut(&mut button_props).add_aria_prop(AriaAttributes::AriaAtomic(true));
+        gloo_console::log!("create ran");
+
+        let callback: Callback<MouseEvent> = ctx.link().callback(move |_ev| {
+            log!("something");
+            Msg::RemoveListener("click-event".into())
+        });
+        Rc::make_mut(&mut button_props).add_listener(
+            "click-event".into(),
+            EventType::MouseEvent(MouseEvents::Click(callback)),
+        );
 
         Self {
             value: 0,
             btn_disabled: false,
-            button_props: button_props,
+            button_props,
         }
     }
 
@@ -48,27 +67,34 @@ impl Component for Model {
             }
             Msg::SetDisabled(is_disabled) => {
                 log!("set disabled ran");
-                self.button_props
-                    .add_btn_attribute(ButtonHtmlAttributes::Disabled);
+                Rc::make_mut(&mut self.button_props)
+                    .add_button_prop(ButtonHtmlAttributes::Disabled);
                 self.btn_disabled = is_disabled;
-                self.button_props
-                    .add_attribute("my-custom-attr".into(), "lalalala".into());
+                Rc::make_mut(&mut self.button_props).add_custom_prop(CustomAttribute::new(
+                    "my-custom-attribute".into(),
+                    "lalalala".into(),
+                ));
                 true
+            }
+            Msg::RemoveListener(key) => {
+                gloo_console::log!("REMOVING IT");
+                Rc::make_mut(&mut self.button_props).remove_listener(key);
+                true
+            }
+            Msg::UpdateButtonProps(new_props) => {
+                gloo_console::log!("update props");
+                self.button_props = new_props;
+                false
             }
         }
     }
 
+    // fn changed(&mut self, ctx: &Context<Self>) -> bool {}
+
     fn view(&self, ctx: &Context<Self>) -> Html {
+        gloo_console::log!("view ran");
         let link = ctx.link();
         let is_disabled = self.btn_disabled.to_owned();
-
-        let callback: Callback<MouseEvent> = link.callback(move |_ev| {
-            log!("something");
-            Msg::SetDisabled(!is_disabled)
-        });
-
-        let mut button_props = self.button_props.clone();
-        button_props.add_mouse_event_listener(MouseEvents::Click(callback));
 
         let spritemap = "https://cdn.jsdelivr.net/npm/@clayui/css/lib/images/icons/icons.svg";
 
@@ -79,12 +105,8 @@ impl Component for Model {
                 <MatButton label="Click me!"  />
                 <ButtonGroup spaced={true} class={"stupid-class"}>
                     <ClayButton
-                       // misc_attrs={self.btn_1_misc_attrs.clone()}
-
                         display_type={DisplayType::Info}
-                        // onclick={on_click}
-                        button_html_attributes={Some(button_props)}
-                        //aria={aria}
+                        button_html_attributes={Some(self.button_props.clone())}
                         >
                     {"Click Me"}
                     </ClayButton>

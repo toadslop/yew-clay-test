@@ -621,6 +621,7 @@ dependencies = [
 name = "yew-clay"
 version = "0.1.0"
 dependencies = [
+ "gloo-console",
  "gloo-events",
  "js-sys",
  "stdweb",
@@ -649,6 +650,7 @@ dependencies = [
 name = "yew-dom-attributes"
 version = "0.1.0"
 dependencies = [
+ "gloo-console",
  "gloo-events",
  "strum",
  "wasm-bindgen",
