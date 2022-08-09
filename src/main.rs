@@ -1,13 +1,12 @@
 use std::rc::Rc;
 
+use domatt::{AriaAttributes, ButtonHtmlAttributes, ButtonType};
 use web_sys::MouseEvent;
 use yew::{html, Callback, Component, Context, Html};
 use yew_clay::button::{
     ClayButton, ClayButtonGroup, ClayButtonProps, ClayButtonWithIcon, DisplayType,
 };
-use yew_clay::icon::ClayIcon;
-use yew_dom_attributes::attributes::aria_attributes::AriaAttributes;
-use yew_dom_attributes::attributes::button_html_attributes::ButtonHtmlAttributes;
+
 use yew_dom_attributes::events::events::{EventType, MouseEvents};
 use yew_dom_attributes::props::aria_props::AriaPropsHandler;
 use yew_dom_attributes::props::button_props::{ButtonProps, ButtonPropsHandler};
@@ -33,38 +32,31 @@ impl Component for Model {
     type Properties = ();
 
     fn create(ctx: &Context<Self>) -> Self {
-        let on_btn_props_update: Callback<Rc<ButtonProps>> = ctx
-            .link()
-            .callback(move |btn_props: Rc<ButtonProps>| Msg::UpdateBtnPrimaryProps(btn_props));
+        let update_func = |btn_props: Rc<ButtonProps>| Msg::UpdateBtnPrimaryProps(btn_props);
+        let mut button_primary_props = ButtonProps::new(ctx, update_func);
+        button_primary_props.add_aria_prop(AriaAttributes::AriaAtomic(true));
+        button_primary_props.add_button_prop(ButtonHtmlAttributes::Type(&ButtonType::Button));
 
-        let mut button_primary_props = Rc::new(ButtonProps::new(on_btn_props_update));
-
-        Rc::make_mut(&mut button_primary_props).add_aria_prop(AriaAttributes::AriaAtomic(true));
-
-        let callback: Callback<MouseEvent> = ctx
+        let remove_listener_cb: Callback<MouseEvent> = ctx
             .link()
             .callback(move |_ev| Msg::RemoveListener("click-event".into()));
 
-        Rc::make_mut(&mut button_primary_props).add_listener(
+        button_primary_props.add_listener(
             "click-event".into(),
-            EventType::MouseEvent(MouseEvents::Click(callback)),
+            EventType::MouseEvent(MouseEvents::Click(remove_listener_cb)),
         );
 
-        let on_btn_warning_props_update: Callback<Rc<ButtonProps>> = ctx
-            .link()
-            .callback(move |btn_props: Rc<ButtonProps>| Msg::UpdateBtnWarningProps(btn_props));
+        let btn_warning_update_func =
+            |btn_props: Rc<ButtonProps>| Msg::UpdateBtnWarningProps(btn_props);
 
-        let button_warning_props = Rc::new(ButtonProps::new(on_btn_warning_props_update));
+        let button_warning_props = ButtonProps::new(ctx, btn_warning_update_func);
 
         let callback: Callback<MouseEvent> = ctx.link().callback(move |_ev| Msg::ToggleDisabled);
 
-        Rc::make_mut(&mut button_primary_props).add_listener(
+        button_primary_props.add_listener(
             "set-disabled".into(),
             EventType::MouseEvent(MouseEvents::Click(callback)),
         );
-        button_warning_props
-            .get_props_update_callback()
-            .emit(button_warning_props.clone());
 
         let icon_button_props = ClayButtonProps {
             borderless: true,
@@ -73,8 +65,8 @@ impl Component for Model {
 
         Self {
             btn_disabled: false,
-            button_primary_props,
-            button_warning_props,
+            button_primary_props: Rc::new(button_primary_props),
+            button_warning_props: Rc::new(button_warning_props),
             icon_button_props,
         }
     }
@@ -92,10 +84,12 @@ impl Component for Model {
                         .remove_button_prop(ButtonHtmlAttributes::Disabled);
                 }
 
-                Rc::make_mut(&mut self.button_warning_props).add_custom_prop(CustomAttribute::new(
-                    "my-custom-attribute".into(),
-                    "lalalala".into(),
-                ));
+                Rc::make_mut(&mut self.button_warning_props).add_custom_prop(
+                    CustomAttribute::new_key_value_attribute(
+                        "my-custom-attribute".into(),
+                        "lalalala".into(),
+                    ),
+                );
                 true
             }
             Msg::RemoveListener(key) => {
