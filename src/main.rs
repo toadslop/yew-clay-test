@@ -1,16 +1,9 @@
 use std::rc::Rc;
-
-use domatt::{AriaAttributes, ButtonHtmlAttributes, ButtonType};
 use web_sys::MouseEvent;
 use yew::{html, Callback, Component, Context, Html};
-use yew_clay::button::{
-    ClayButton, ClayButtonGroup, ClayButtonProps, ClayButtonWithIcon, DisplayType,
-};
-
+use yew_clay::ClayButtonProps;
 use yew_dom_attributes::events::events::{EventType, MouseEvents};
-use yew_dom_attributes::props::aria_props::AriaPropsHandler;
-use yew_dom_attributes::props::button_props::{ButtonProps, ButtonPropsHandler};
-use yew_dom_attributes::props::custom_attributes::{CustomAttribute, CustomPropsHandler};
+use yew_dom_attributes::props::button_props::ButtonProps;
 use yew_dom_attributes::props::DomInjector;
 
 pub enum Msg {
@@ -34,8 +27,8 @@ impl Component for Model {
     fn create(ctx: &Context<Self>) -> Self {
         let update_func = |btn_props: Rc<ButtonProps>| Msg::UpdateBtnPrimaryProps(btn_props);
         let mut button_primary_props = ButtonProps::new(ctx, update_func);
-        button_primary_props.add_aria_prop(AriaAttributes::AriaAtomic(true));
-        button_primary_props.add_button_prop(ButtonHtmlAttributes::Type(&ButtonType::Button));
+        // button_primary_props.add_aria_prop(AriaAttributes::AriaAtomic(true));
+        // button_primary_props.add_button_prop(ButtonHtmlAttributes::Type(&ButtonType::Button));
 
         let remove_listener_cb: Callback<MouseEvent> = ctx
             .link()
