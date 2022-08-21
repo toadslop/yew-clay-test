@@ -41,6 +41,8 @@ impl Component for Model {
             .link()
             .callback(move |_ev| Msg::RemoveListener("click-event".into()));
 
+        button_primary_props
+
         // button_primary_props.add_listener(
         //     "click-event".into(),
         //     EventType::MouseEvent(MouseEvents::Click(remove_listener_cb)),
