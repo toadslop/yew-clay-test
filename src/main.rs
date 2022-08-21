@@ -1,6 +1,10 @@
 use domatt::attributes::aria::AriaAtomic;
 use domatt::attributes::button::ButtonTypeOption;
+use domatt::attributes::button::Disabled;
 use domatt::attributes::button::Type;
+use domatt::attributes::global::CustomAttribute;
+use domatt::attributes::Attribute;
+use domatt::events::Click;
 use std::rc::Rc;
 use web_sys::MouseEvent;
 use yew::{html, Callback, Component, Context, Html};
@@ -41,12 +45,7 @@ impl Component for Model {
             .link()
             .callback(move |_ev| Msg::RemoveListener("click-event".into()));
 
-        button_primary_props
-
-        // button_primary_props.add_listener(
-        //     "click-event".into(),
-        //     EventType::MouseEvent(MouseEvents::Click(remove_listener_cb)),
-        // );
+        button_primary_props.add_listener("click-event", Rc::new(Click::from(remove_listener_cb)));
 
         let btn_warning_update_func =
             |btn_props: Rc<ButtonProps>| Msg::UpdateBtnWarningProps(btn_props);
@@ -55,10 +54,7 @@ impl Component for Model {
 
         let callback: Callback<MouseEvent> = ctx.link().callback(move |_ev| Msg::ToggleDisabled);
 
-        // button_primary_props.add_listener(
-        //     "set-disabled".into(),
-        //     EventType::MouseEvent(MouseEvents::Click(callback)),
-        // );
+        button_primary_props.add_listener("my-disabled", Rc::new(Click::from(callback)));
 
         let icon_button_props = ClayButtonProps {
             borderless: true,
@@ -74,28 +70,27 @@ impl Component for Model {
     }
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
+        gloo_console::log!("RAN UPDATE");
         match msg {
             Msg::ToggleDisabled => {
+                gloo_console::log!("RAN TOGGLE DISABLED");
                 self.btn_disabled = !self.btn_disabled;
 
                 if self.btn_disabled {
-                    // Rc::make_mut(&mut self.button_warning_props)
-                    //     .add_button_prop(ButtonHtmlAttributes::Disabled);
+                    gloo_console::log!("MAKING DISABLED");
+                    Rc::make_mut(&mut self.button_warning_props).add_attribute(Box::new(Disabled));
                 } else {
-                    // Rc::make_mut(&mut self.button_warning_props)
-                    //     .remove_button_prop(ButtonHtmlAttributes::Disabled);
+                    Rc::make_mut(&mut self.button_warning_props)
+                        .remove_attribute(Disabled.get_key());
                 }
-
-                // Rc::make_mut(&mut self.button_warning_props).add_custom_prop(
-                //     CustomAttribute::new_key_value_attribute(
-                //         "my-custom-attribute".into(),
-                //         "lalalala".into(),
-                //     ),
-                // );
+                let my_attribute = CustomAttribute::new("my-custom-attribute", Some("lalalala"));
+                Rc::make_mut(&mut self.button_warning_props).add_attribute(Box::new(my_attribute));
                 true
             }
             Msg::RemoveListener(key) => {
-                // Rc::make_mut(&mut self.button_primary_props).remove_listener(key);
+                gloo_console::log!("RAN REMOVE LISTENER");
+                gloo_console::log!(&key);
+                Rc::make_mut(&mut self.button_primary_props).remove_listener(key);
                 true
             }
             Msg::UpdateBtnPrimaryProps(new_props) => {
