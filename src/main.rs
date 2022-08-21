@@ -1,17 +1,16 @@
+use domatt::attributes::aria::AriaAtomic;
+use domatt::attributes::button::ButtonTypeOption;
+use domatt::attributes::button::Type;
 use std::rc::Rc;
-
-use domatt::{AriaAttributes, ButtonHtmlAttributes, ButtonType};
 use web_sys::MouseEvent;
 use yew::{html, Callback, Component, Context, Html};
-use yew_clay::button::{
-    ClayButton, ClayButtonGroup, ClayButtonProps, ClayButtonWithIcon, DisplayType,
-};
-
-use yew_dom_attributes::events::events::{EventType, MouseEvents};
-use yew_dom_attributes::props::aria_props::AriaPropsHandler;
-use yew_dom_attributes::props::button_props::{ButtonProps, ButtonPropsHandler};
-use yew_dom_attributes::props::custom_attributes::{CustomAttribute, CustomPropsHandler};
-use yew_dom_attributes::props::DomInjector;
+use yew_clay::ClayButton;
+use yew_clay::ClayButtonGroup;
+use yew_clay::ClayButtonProps;
+use yew_clay::ClayButtonWithIcon;
+use yew_clay::DisplayType;
+use yew_dom_attributes::button_props::ButtonProps;
+use yew_dom_attributes::DomInjector;
 
 pub enum Msg {
     ToggleDisabled,
@@ -34,17 +33,18 @@ impl Component for Model {
     fn create(ctx: &Context<Self>) -> Self {
         let update_func = |btn_props: Rc<ButtonProps>| Msg::UpdateBtnPrimaryProps(btn_props);
         let mut button_primary_props = ButtonProps::new(ctx, update_func);
-        button_primary_props.add_aria_prop(AriaAttributes::AriaAtomic(true));
-        button_primary_props.add_button_prop(ButtonHtmlAttributes::Type(&ButtonType::Button));
+
+        button_primary_props.add_attribute(Box::new(AriaAtomic::new(true)));
+        button_primary_props.add_attribute(Box::new(Type::new(ButtonTypeOption::Submit)));
 
         let remove_listener_cb: Callback<MouseEvent> = ctx
             .link()
             .callback(move |_ev| Msg::RemoveListener("click-event".into()));
 
-        button_primary_props.add_listener(
-            "click-event".into(),
-            EventType::MouseEvent(MouseEvents::Click(remove_listener_cb)),
-        );
+        // button_primary_props.add_listener(
+        //     "click-event".into(),
+        //     EventType::MouseEvent(MouseEvents::Click(remove_listener_cb)),
+        // );
 
         let btn_warning_update_func =
             |btn_props: Rc<ButtonProps>| Msg::UpdateBtnWarningProps(btn_props);
@@ -53,10 +53,10 @@ impl Component for Model {
 
         let callback: Callback<MouseEvent> = ctx.link().callback(move |_ev| Msg::ToggleDisabled);
 
-        button_primary_props.add_listener(
-            "set-disabled".into(),
-            EventType::MouseEvent(MouseEvents::Click(callback)),
-        );
+        // button_primary_props.add_listener(
+        //     "set-disabled".into(),
+        //     EventType::MouseEvent(MouseEvents::Click(callback)),
+        // );
 
         let icon_button_props = ClayButtonProps {
             borderless: true,
@@ -77,23 +77,23 @@ impl Component for Model {
                 self.btn_disabled = !self.btn_disabled;
 
                 if self.btn_disabled {
-                    Rc::make_mut(&mut self.button_warning_props)
-                        .add_button_prop(ButtonHtmlAttributes::Disabled);
+                    // Rc::make_mut(&mut self.button_warning_props)
+                    //     .add_button_prop(ButtonHtmlAttributes::Disabled);
                 } else {
-                    Rc::make_mut(&mut self.button_warning_props)
-                        .remove_button_prop(ButtonHtmlAttributes::Disabled);
+                    // Rc::make_mut(&mut self.button_warning_props)
+                    //     .remove_button_prop(ButtonHtmlAttributes::Disabled);
                 }
 
-                Rc::make_mut(&mut self.button_warning_props).add_custom_prop(
-                    CustomAttribute::new_key_value_attribute(
-                        "my-custom-attribute".into(),
-                        "lalalala".into(),
-                    ),
-                );
+                // Rc::make_mut(&mut self.button_warning_props).add_custom_prop(
+                //     CustomAttribute::new_key_value_attribute(
+                //         "my-custom-attribute".into(),
+                //         "lalalala".into(),
+                //     ),
+                // );
                 true
             }
             Msg::RemoveListener(key) => {
-                Rc::make_mut(&mut self.button_primary_props).remove_listener(key);
+                // Rc::make_mut(&mut self.button_primary_props).remove_listener(key);
                 true
             }
             Msg::UpdateBtnPrimaryProps(new_props) => {
