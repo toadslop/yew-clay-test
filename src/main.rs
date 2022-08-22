@@ -8,11 +8,7 @@ use domatt::events::Click;
 use std::rc::Rc;
 use web_sys::MouseEvent;
 use yew::{html, Callback, Component, Context, Html};
-use yew_clay::ClayButton;
-use yew_clay::ClayButtonGroup;
-use yew_clay::ClayButtonProps;
-use yew_clay::ClayButtonWithIcon;
-use yew_clay::DisplayType;
+use yew_clay::{ClayButton, ClayButtonGroup, ClayButtonProps, ClayButtonWithIcon, DisplayType};
 use yew_dom_attributes::button_props::ButtonProps;
 use yew_dom_attributes::DomInjector;
 
@@ -70,14 +66,11 @@ impl Component for Model {
     }
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
-        gloo_console::log!("RAN UPDATE");
         match msg {
             Msg::ToggleDisabled => {
-                gloo_console::log!("RAN TOGGLE DISABLED");
                 self.btn_disabled = !self.btn_disabled;
 
                 if self.btn_disabled {
-                    gloo_console::log!("MAKING DISABLED");
                     Rc::make_mut(&mut self.button_warning_props).add_attribute(Box::new(Disabled));
                 } else {
                     Rc::make_mut(&mut self.button_warning_props)
@@ -88,8 +81,6 @@ impl Component for Model {
                 true
             }
             Msg::RemoveListener(key) => {
-                gloo_console::log!("RAN REMOVE LISTENER");
-                gloo_console::log!(&key);
                 Rc::make_mut(&mut self.button_primary_props).remove_listener(key);
                 true
             }
