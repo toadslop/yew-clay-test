@@ -32,7 +32,7 @@ impl Component for Model {
 
     fn create(ctx: &Context<Self>) -> Self {
         let update_func = |btn_props: Rc<ButtonProps>| Msg::UpdateBtnPrimaryProps(btn_props);
-        let mut button_primary_props = ButtonProps::new(ctx, update_func);
+        let mut button_primary_props = ButtonProps::with_update_callback(ctx, update_func);
 
         button_primary_props.add_attribute(Box::new(AriaAtomic::new(true)));
         button_primary_props.add_attribute(Box::new(Type::new(ButtonTypeOption::Submit)));
@@ -46,7 +46,7 @@ impl Component for Model {
         let btn_warning_update_func =
             |btn_props: Rc<ButtonProps>| Msg::UpdateBtnWarningProps(btn_props);
 
-        let button_warning_props = ButtonProps::new(ctx, btn_warning_update_func);
+        let button_warning_props = ButtonProps::with_update_callback(ctx, btn_warning_update_func);
 
         let callback: Callback<MouseEvent> = ctx.link().callback(move |_ev| Msg::ToggleDisabled);
 
