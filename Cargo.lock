@@ -133,10 +133,11 @@ dependencies = [
 
 [[package]]
 name = "gloo-console"
-version = "0.2.1"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3907f786f65bbb4f419e918b0c5674175ef1c231ecda93b2dbd65fd1e8882637"
+checksum = "82b7ce3c05debe147233596904981848862b068862e9ec3e34be446077190d3f"
 dependencies = [
+ "gloo-utils",
  "js-sys",
  "serde",
  "wasm-bindgen",
@@ -233,11 +234,13 @@ dependencies = [
 
 [[package]]
 name = "gloo-utils"
-version = "0.1.4"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "929c53c913bb7a88d75d9dc3e9705f963d8c2b9001510b25ddaf671b9fb7049d"
+checksum = "40913a05c8297adca04392f707b1e73b12ba7b8eab7244a4961580b1fd34063c"
 dependencies = [
  "js-sys",
+ "serde",
+ "serde_json",
  "wasm-bindgen",
  "web-sys",
 ]
@@ -667,11 +670,11 @@ name = "yew-clay"
 version = "0.1.0"
 dependencies = [
  "derive_more",
+ "domatt",
  "gloo-console",
  "gloo-events",
  "js-sys",
  "strum",
- "strum_macros",
  "wasm-bindgen",
  "web-sys",
  "yew",
@@ -697,6 +700,7 @@ name = "yew-dom-attributes"
 version = "0.1.0"
 dependencies = [
  "domatt",
+ "gloo-console",
  "gloo-events",
  "strum",
  "wasm-bindgen",

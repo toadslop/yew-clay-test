@@ -8,15 +8,15 @@ use domatt::events::Click;
 use std::rc::Rc;
 use web_sys::MouseEvent;
 use yew::{html, Callback, Component, Context, Html};
-use yew_clay::{ClayButton, ClayButtonGroup, ClayButtonProps, ClayButtonWithIcon, DisplayType};
+use yew_clay::{
+    ButtonDisplayType, ClayButton, ClayButtonGroup, ClayButtonProps, ClayButtonWithIcon,
+};
 use yew_dom_attributes::button_props::ButtonProps;
 use yew_dom_attributes::DomInjector;
 
 pub enum Msg {
     ToggleDisabled,
     RemoveListener(String),
-    UpdateBtnPrimaryProps(Rc<ButtonProps>),
-    UpdateBtnWarningProps(Rc<ButtonProps>),
 }
 
 struct Model {
@@ -31,8 +31,7 @@ impl Component for Model {
     type Properties = ();
 
     fn create(ctx: &Context<Self>) -> Self {
-        let update_func = |btn_props: Rc<ButtonProps>| Msg::UpdateBtnPrimaryProps(btn_props);
-        let mut button_primary_props = ButtonProps::with_update_callback(ctx, update_func);
+        let mut button_primary_props = ButtonProps::new();
 
         button_primary_props.add_attribute(Box::new(AriaAtomic::new(true)));
         button_primary_props.add_attribute(Box::new(Type::new(ButtonTypeOption::Submit)));
@@ -41,16 +40,12 @@ impl Component for Model {
             .link()
             .callback(move |_ev| Msg::RemoveListener("click-event".into()));
 
-        button_primary_props.add_listener("click-event", Rc::new(Click::from(remove_listener_cb)));
-
-        let btn_warning_update_func =
-            |btn_props: Rc<ButtonProps>| Msg::UpdateBtnWarningProps(btn_props);
-
-        let button_warning_props = ButtonProps::with_update_callback(ctx, btn_warning_update_func);
+        let button_warning_props = ButtonProps::new();
 
         let callback: Callback<MouseEvent> = ctx.link().callback(move |_ev| Msg::ToggleDisabled);
 
         button_primary_props.add_listener("my-disabled", Rc::new(Click::from(callback)));
+        button_primary_props.add_listener("click-event", Rc::new(Click::from(remove_listener_cb)));
 
         let icon_button_props = ClayButtonProps {
             borderless: true,
@@ -69,7 +64,6 @@ impl Component for Model {
         match msg {
             Msg::ToggleDisabled => {
                 self.btn_disabled = !self.btn_disabled;
-
                 if self.btn_disabled {
                     Rc::make_mut(&mut self.button_warning_props).add_attribute(Box::new(Disabled));
                 } else {
@@ -82,14 +76,6 @@ impl Component for Model {
             }
             Msg::RemoveListener(key) => {
                 Rc::make_mut(&mut self.button_primary_props).remove_listener(key);
-                true
-            }
-            Msg::UpdateBtnPrimaryProps(new_props) => {
-                self.button_primary_props = new_props;
-                false
-            }
-            Msg::UpdateBtnWarningProps(new_props) => {
-                self.button_warning_props = new_props;
                 false
             }
         }
@@ -103,13 +89,13 @@ impl Component for Model {
                 <h1>{ "Yew Component Library With Dynamic Props Demo" }</h1>
                 <ClayButtonGroup spaced={true} class={"stupid-class"}>
                     <ClayButton
-                        display_type={DisplayType::Info}
+                        display_type={ButtonDisplayType::Info}
                         button_html_attributes={Some(self.button_primary_props.clone())}
                         >
                     {"Click Me"}
                     </ClayButton>
                     <ClayButton
-                        display_type={DisplayType::Warning}
+                        display_type={ButtonDisplayType::Warning}
                         button_html_attributes={Some(self.button_warning_props.clone())}
                          >
                     {"Other Button"}
