@@ -21,8 +21,8 @@ pub enum Msg {
 
 struct Model {
     btn_disabled: bool,
-    button_primary_props: Rc<ButtonProps>,
-    button_warning_props: Rc<ButtonProps>,
+    button_primary_props: ButtonProps,
+    button_warning_props: ButtonProps,
     icon_button_props: ClayButtonProps,
 }
 
@@ -36,9 +36,10 @@ impl Component for Model {
         button_primary_props.add_attribute(Box::new(AriaAtomic::new(true)));
         button_primary_props.add_attribute(Box::new(Type::new(ButtonTypeOption::Submit)));
 
-        let remove_listener_cb: Callback<MouseEvent> = ctx
-            .link()
-            .callback(move |_ev| Msg::RemoveListener("click-event".into()));
+        let remove_listener_cb: Callback<MouseEvent> = ctx.link().callback(move |_ev| {
+            gloo_console::log!("KKKKK");
+            Msg::RemoveListener("click-event".into())
+        });
 
         let button_warning_props = ButtonProps::new();
 
@@ -54,8 +55,8 @@ impl Component for Model {
 
         Self {
             btn_disabled: false,
-            button_primary_props: Rc::new(button_primary_props),
-            button_warning_props: Rc::new(button_warning_props),
+            button_primary_props,
+            button_warning_props,
             icon_button_props,
         }
     }
@@ -65,17 +66,18 @@ impl Component for Model {
             Msg::ToggleDisabled => {
                 self.btn_disabled = !self.btn_disabled;
                 if self.btn_disabled {
-                    Rc::make_mut(&mut self.button_warning_props).add_attribute(Box::new(Disabled));
+                    self.button_warning_props.add_attribute(Box::new(Disabled));
                 } else {
-                    Rc::make_mut(&mut self.button_warning_props)
+                    self.button_warning_props
                         .remove_attribute(Disabled.get_key());
                 }
                 let my_attribute = CustomAttribute::new("my-custom-attribute", Some("lalalala"));
-                Rc::make_mut(&mut self.button_warning_props).add_attribute(Box::new(my_attribute));
+                self.button_warning_props
+                    .add_attribute(Box::new(my_attribute));
                 true
             }
             Msg::RemoveListener(key) => {
-                Rc::make_mut(&mut self.button_primary_props).remove_listener(key);
+                self.button_primary_props.remove_listener(key);
                 false
             }
         }
